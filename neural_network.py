@@ -8,8 +8,6 @@ def sigmoid(k):
 def sigmoid_prime(k):
     return sigmoid(k) * (1 - sigmoid(k))
 
-
-
 def tan_sigmoid(k):
     return (np.exp(k) - np.exp(-k))/(np.exp(k) + np.exp(-k))
 
@@ -23,13 +21,10 @@ def softmax(last_layers):
 
     return beta
 
-
-
-
 class Network:
     np.random.seed(0)
 
-    def __init__(self,layers,max_epoch,eta,func):
+    def __init__(self,layers = [784,10],max_epoch = 5,eta = 0.01,func = "sigmoid"):
         self.layers = layers # without bias
         self.weights = [np.random.randn(y,x) for (x,y) in zip(self.layers[0:-1],self.layers[1:])]
         self.z = [np.random.randn(x,1) for x in self.layers]
@@ -60,24 +55,11 @@ class Network:
             else:
                 self.a[L+1] = softmax(self.z[L+1])
 
-    # def back_probagate(self):
-    #     eta = 0.001
-    #     delta_weights = []
-    #     delta_bias = []
-    #
-    #     for L in range(len(self.layers) - 1,0,-1):
-    #         self.deltas[L - 1] = np.dot(self.weights[L-1 ].T,self.deltas[L]) * sigmoid_prime(self.z[L-1])
-    #         self.weights[L-1] = self.weights[L-1] - eta * np.dot(self.deltas[L],self.a[L-1].T)
-    #         self.bias[ L-1 ] = self.bias[L-1 ] - eta * self.deltas[L]
-
-
     def mini_batch_back_probagate(self):
         delta_weights = [np.zeros((y,x)) for (x,y) in zip(self.layers[0:-1],self.layers[1:])]
         delta_bias = [np.zeros((x,1)) for x in self.layers[1:]]
         for L in range(len(self.layers) - 1,0,-1):
             self.deltas[L - 1] = np.dot(self.weights[L-1 ].T,self.deltas[L]) * self.g_prime(self.z[L-1])
-            # self.weights[L-1] = self.weights[L-1] - eta * np.dot(self.deltas[L],self.a[L-1].T)
-            # self.bias[ L-1 ] = self.bias[L-1 ] - eta * self.deltas[L]
             delta_weights[L-1] = np.dot(self.deltas[L],self.a[L-1].T)
             delta_bias[L-1] = self.deltas[L].copy()
 
@@ -96,7 +78,6 @@ class Network:
         images = raw_images.copy()
         labels = raw_labels.copy()
         index = np.arange(images.shape[1]//self.mini_batch_size * self.mini_batch_size)
-        # np.random.shuffle(index)
         # divide the data in to small batches
         training_data = [(images[:,index_batch],labels[:,index_batch]) for index_batch in np.split(index,len(index)//self.mini_batch_size)]
         #one epoch
@@ -108,9 +89,6 @@ class Network:
             for i in range(self.mini_batch_size):
                 input_data = mini_batch_data[:,i]
                 output_target = mini_batch_labels[:,i].reshape(10,1)
-                # output_target = np.zeros(10)
-                # output_target[mini_batch_labels[i]] = 1
-                # output_target = output_target.reshape(10,1)
                 self.deltas[-1] = (self.test(input_data) - output_target) #* sigmoid_prime(self.z[-1])
                 delta_weights, delta_bias = self.mini_batch_back_probagate()
 
@@ -136,9 +114,6 @@ class Network:
     #         self.back_probagate()
 
     def fit(self,raw_images,raw_labels):
-        # split into training and validation sets
-        # images = raw_images.copy()
-        # labels = raw_images.copy()
         index = np.arange(raw_images.shape[1])
         for i in range(self.max_epoch):
 
@@ -160,7 +135,7 @@ class Network:
             training_accuracy = self.check_accuracy(training_images,training_labels)
             validation_accuracy = self.check_accuracy(validation_images, validation_labels)
             hold_out_accuracy = self.check_accuracy(hold_out_images, hold_out_labels)
-            print("Epoch[%d]\tTraining : %.3f\t Val : %.3f\t Hold out : %.3f" % (i,training_accuracy,validation_accuracy,hold_out_accuracy))
+            print("Epoch[%d]\tTraining : %.4f\t Val : %.4f\t Hold out : %.4f" % (i,training_accuracy,validation_accuracy,hold_out_accuracy))
 
 
     def check_accuracy(self,images,lables):
