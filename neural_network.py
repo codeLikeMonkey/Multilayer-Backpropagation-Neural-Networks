@@ -102,17 +102,6 @@ class Network:
                 self.weights[L-1] = self.weights[L-1] - self.eta * Delta_batch_weights[L-1]
                 self.bias[ L-1 ] = self.bias[L-1 ] - self.eta * Delta_batch_bias[L-1]
 
-    # def train(self,images,labels):
-    #     for i in range(images.shape[1]):
-    #         # print(self.test(images[:,1]))
-    #         input_data = images[:,i]
-    #         target = np.zeros(10)
-    #         target[labels[i]] = 1
-    #         target = target.reshape(10,1)
-    #         output = self.test(input_data)
-    #         self.deltas[-1] = (self.a[-1] - target) #* sigmoid_prime(self.z[-1])
-    #         self.back_probagate()
-
     def fit(self,raw_images,raw_labels):
         index = np.arange(raw_images.shape[1])
         for i in range(self.max_epoch):
