@@ -8,12 +8,21 @@ def sigmoid(k):
 def sigmoid_prime(k):
     return sigmoid(k) * (1 - sigmoid(k))
 
+
+
+def tan_sigmoid(k):
+    return (np.exp(k) - np.exp(-k))/(np.exp(k) + np.exp(-k))
+
+def tan_sigmoid_prime(k):
+    return 1 - tan_sigmoid(k)**2
+
 def softmax(last_layers):
     alpha = last_layers - np.max(last_layers)
     alpha = np.exp(alpha)
     beta = alpha/np.sum(alpha)
 
     return beta
+
 
 
 
@@ -34,6 +43,11 @@ class Network:
         if func == "sigmoid":
             self.g = sigmoid
             self.g_prime = sigmoid_prime
+
+        if func == "tanh":
+            self.g = tan_sigmoid
+            self.g_prime = tan_sigmoid_prime
+
 
 
     def feed_forward(self):
@@ -146,7 +160,7 @@ class Network:
             training_accuracy = self.check_accuracy(training_images,training_labels)
             validation_accuracy = self.check_accuracy(validation_images, validation_labels)
             hold_out_accuracy = self.check_accuracy(hold_out_images, hold_out_labels)
-            print("Epoch[%d]\tTraining : %s\t Val : %s\t Hold out : %s" % (i,training_accuracy,validation_accuracy,hold_out_accuracy))
+            print("Epoch[%d]\tTraining : %.3f\t Val : %.3f\t Hold out : %.3f" % (i,training_accuracy,validation_accuracy,hold_out_accuracy))
 
 
     def check_accuracy(self,images,lables):
