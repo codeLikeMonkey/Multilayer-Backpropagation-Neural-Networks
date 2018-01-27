@@ -24,13 +24,18 @@ def softmax(last_layers):
 class Network:
     np.random.seed(0)
 
-    def __init__(self,layers = [784,10],max_epoch = 5,eta = 0.01,func = "sigmoid"):
+    def __init__(self,layers = [784,10],max_epoch = 5,eta = 0.01,func = "sigmoid",sqrt_initialize = False):
         self.layers = layers # without bias
-        self.weights = [np.random.randn(y,x) for (x,y) in zip(self.layers[0:-1],self.layers[1:])]
+
+        if sqrt_initialize == True:
+            self.weights = [np.random.normal(0, 1.0 / np.sqrt(y), (y, x)) for (x, y) in zip(self.layers[0:-1], self.layers[1:])]
+        else:
+            self.weights = [np.random.randn(y,x) for (x,y) in zip(self.layers[0:-1],self.layers[1:])]
+
         self.z = [np.random.randn(x,1) for x in self.layers]
         self.a = [np.random.randn(x,1) for x in self.layers]
-        self.deltas = [np.zeros((x,1)) for x in self.layers]
         self.bias = [np.random.randn(x,1) for x in self.layers[1:]]
+        self.deltas = [np.zeros((x, 1)) for x in self.layers]
         self.mini_batch_size = 128
         self.eta = eta
         self.max_epoch = max_epoch
@@ -124,7 +129,7 @@ class Network:
             training_accuracy = self.check_accuracy(training_images,training_labels)
             validation_accuracy = self.check_accuracy(validation_images, validation_labels)
             hold_out_accuracy = self.check_accuracy(hold_out_images, hold_out_labels)
-            print("Epoch[%d]\tTraining : %.4f\t Val : %.4f\t Hold out : %.4f" % (i,training_accuracy,validation_accuracy,hold_out_accuracy))
+            print("Epoch[%d]\tTraining : %.4f\t Val : %.4f\t Hold out : %.4f" % (i,training_accuracy * 100,validation_accuracy * 100,hold_out_accuracy * 100))
 
 
     def check_accuracy(self,images,lables):

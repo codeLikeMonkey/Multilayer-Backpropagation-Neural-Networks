@@ -23,7 +23,13 @@ def normalize_data(images,labels):
 if __name__ == "__main__":
     images, labels = read_in_data()
     #check error
-    net = Network(layers = [784,64,10],max_epoch = 30,eta = 0.01,func = 'sigmoid')
+    net = Network(
+        layers = [784,10],
+        max_epoch = 200,
+        eta = 0.01,
+        func = 'sigmoid',
+        sqrt_initialize = False
+    )
     images, labels = normalize_data(images, labels)
     net.fit(images,labels)
     # map(net.check_accuracy(images,labels)
