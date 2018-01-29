@@ -24,11 +24,13 @@ if __name__ == "__main__":
     images, labels = read_in_data()
     #check error
     net = Network(
-        layers = [784,10],
+        layers = [784,50,50,10],
         max_epoch = 200,
         eta = 0.01,
         func = 'sigmoid',
-        sqrt_initialize = False
+        is_sqrt_initialize = True,
+        is_shuffle = True,
+        is_momentum = True
     )
     images, labels = normalize_data(images, labels)
     net.fit(images,labels)

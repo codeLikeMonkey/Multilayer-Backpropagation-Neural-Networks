@@ -24,10 +24,10 @@ def softmax(last_layers):
 class Network:
     np.random.seed(0)
 
-    def __init__(self,layers = [784,10],max_epoch = 5,eta = 0.01,func = "sigmoid",sqrt_initialize = False):
+    def __init__(self,layers = [784,10],max_epoch = 5,eta = 0.01,func = "sigmoid",is_sqrt_initialize = False,is_shuffle = True,is_momentum = False):
         self.layers = layers # without bias
 
-        if sqrt_initialize == True:
+        if is_sqrt_initialize:
             self.weights = [np.random.normal(0, 1.0 / np.sqrt(y), (y, x)) for (x, y) in zip(self.layers[0:-1], self.layers[1:])]
         else:
             self.weights = [np.random.randn(y,x) for (x,y) in zip(self.layers[0:-1],self.layers[1:])]
@@ -39,6 +39,7 @@ class Network:
         self.mini_batch_size = 128
         self.eta = eta
         self.max_epoch = max_epoch
+        self.is_shuffle = is_shuffle
 
         if func == "sigmoid":
             self.g = sigmoid
@@ -78,8 +79,6 @@ class Network:
 
     def train_with_mini_batch(self,raw_images,raw_labels):
 
-        #shuffle the data
-
         images = raw_images.copy()
         labels = raw_labels.copy()
         index = np.arange(images.shape[1]//self.mini_batch_size * self.mini_batch_size)
@@ -98,7 +97,7 @@ class Network:
                 delta_weights, delta_bias = self.mini_batch_back_probagate()
 
                 for L in range(len(self.layers) - 1,0,-1):
-                    Delta_batch_weights[L-1] +=delta_weights[L-1]
+                    Delta_batch_weights[L-1] += delta_weights[L-1]
                     Delta_batch_bias[L-1] += delta_bias[L-1]
 
 
@@ -111,7 +110,8 @@ class Network:
         index = np.arange(raw_images.shape[1])
         for i in range(self.max_epoch):
 
-            np.random.shuffle(index)
+            if self.is_shuffle:
+                np.random.shuffle(index)
 
             images = raw_images[:, index]
             labels = raw_labels[:, index]
@@ -135,6 +135,9 @@ class Network:
     def check_accuracy(self,images,lables):
         result = np.array([np.argmax(self.test(images[:,i])) for i in range(lables.shape[1])])
         return np.sum(result == np.argmax(lables, axis = 0)) / lables.shape[1]
+
+    def calculate_loss(self,target):
+        pass
 
 
 
