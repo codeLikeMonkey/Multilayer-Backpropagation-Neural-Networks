@@ -24,7 +24,7 @@ def softmax(last_layers):
 class Network:
     np.random.seed(0)
 
-    def __init__(self,layers = [784,10],max_epoch = 5,eta = 0.01,func = "sigmoid",is_sqrt_initialize = False,is_shuffle = True,is_momentum = False):
+    def __init__(self,layers = [784,10],max_epoch = 5,eta = 0.01,func = "sigmoid",is_sqrt_initialize = False,is_shuffle = True,momentum_type = None):
         self.layers = layers # without bias
 
         if is_sqrt_initialize:
@@ -41,6 +41,10 @@ class Network:
         self.max_epoch = max_epoch
         self.is_shuffle = is_shuffle
 
+        self.v_delta_weights = [np.zeros((y,x)) for (x,y) in zip(self.layers[0:-1],self.layers[1:])]
+        self.v_bias = [np.zeros((x, 1)) for x in self.layers[1:]]
+        self.momentum_type = momentum_type
+
         if func == "sigmoid":
             self.g = sigmoid
             self.g_prime = sigmoid_prime
@@ -48,6 +52,28 @@ class Network:
         if func == "tanh":
             self.g = tan_sigmoid
             self.g_prime = tan_sigmoid_prime
+
+        self.records = {
+            "config": {
+                "layers": layers,
+                "eta": eta,
+                "func":func,
+                "is_sqrt_initialize":is_sqrt_initialize,
+                "is_shuffle" : is_shuffle,
+                "momentum_type" : momentum_type
+            },
+            "accuracy": {
+                "training": [],
+                "val": [],
+                "hold_out": []
+            },
+            "loss": {
+                "training": [],
+                "val": [],
+                "hold_out": []
+            }
+
+        }
 
 
 
@@ -103,8 +129,20 @@ class Network:
 
             #update weights and bias
             for L in range(len(self.layers) - 1,0,-1):
-                self.weights[L-1] = self.weights[L-1] - self.eta * Delta_batch_weights[L-1]
-                self.bias[ L-1 ] = self.bias[L-1 ] - self.eta * Delta_batch_bias[L-1]
+
+                if self.momentum_type == "momentum":
+
+                    self.v_delta_weights[L-1] = 0.9 * self.v_delta_weights[L-1] - self.eta * Delta_batch_weights[L-1]
+                    self.v_bias[L-1] = 0.9 * self.v_bias[L-1] - self.eta * Delta_batch_bias[L-1]
+
+                if self.momentum_type == None:
+
+                    self.v_delta_weights[L - 1] = - self.eta * Delta_batch_weights[L - 1]
+                    self.v_bias[L - 1] = - self.eta * Delta_batch_bias[L - 1]
+
+
+                self.weights[L-1] +=  self.v_delta_weights[L-1]
+                self.bias[L-1] += self.v_bias[L-1]
 
     def fit(self,raw_images,raw_labels):
         index = np.arange(raw_images.shape[1])
@@ -130,6 +168,11 @@ class Network:
             validation_accuracy = self.check_accuracy(validation_images, validation_labels)
             hold_out_accuracy = self.check_accuracy(hold_out_images, hold_out_labels)
             print("Epoch[%d]\tTraining : %.4f\t Val : %.4f\t Hold out : %.4f" % (i,training_accuracy * 100,validation_accuracy * 100,hold_out_accuracy * 100))
+
+            self.records["accuracy"]["training"].append(training_accuracy)
+            self.records["accuracy"]["val"].append(validation_accuracy)
+            self.records["accuracy"]["hold_out"].append(hold_out_accuracy)
+
 
 
     def check_accuracy(self,images,lables):
