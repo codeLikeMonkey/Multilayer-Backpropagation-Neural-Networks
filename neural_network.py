@@ -204,7 +204,7 @@ class Network:
 
         E = -np.sum(np.sum(np.multiply(Target, np.log10(Y))))
 
-        return E.astype(float)/Target.shape[1]
+        return E.astype(float)#/Target.shape[1]
 
     def check(self,images,labels):
         raw_result = [self.test(images[:,i]) for i in range(labels.shape[1])]
@@ -235,9 +235,9 @@ class Network:
             training_loss, test_loss, hold_out_loss))
 
         # record accuracy
-        self.records["accuracy"]["training"].append(training_accuracy)
-        self.records["accuracy"]["test"].append(test_accuracy)
-        self.records["accuracy"]["hold_out"].append(hold_out_accuracy)
+        self.records["accuracy"]["training"].append(training_accuracy * 100)
+        self.records["accuracy"]["test"].append(test_accuracy * 100)
+        self.records["accuracy"]["hold_out"].append(hold_out_accuracy * 100)
 
         # record loss
 

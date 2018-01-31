@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
 
     net = Network(
-        layers = [784,10],
+        layers = [784,64,10],
         max_epoch = 5,
         eta = 0.0001,
         func = 'sigmoid',
