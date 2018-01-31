@@ -76,6 +76,16 @@ class Network:
         }
 
 
+        self.data = {
+            "training_images":None,
+            "training_labels":None,
+            "hold_out_images":None,
+            "hold_out_labels": None,
+            "test_images":None,
+            "test_labels":None
+        }
+
+
 
     def feed_forward(self):
         for L in range(len(self.layers)-1):
@@ -114,6 +124,10 @@ class Network:
         counter = 0
         for (mini_batch_data,mini_batch_labels) in  training_data:
             #train each data in the mini_batch
+
+            if counter % 30 ==0:
+                self.show_result()
+
             counter +=1
 
             Delta_batch_weights = [np.zeros((y,x)) for (x,y) in zip(self.layers[0:-1],self.layers[1:])]
@@ -147,17 +161,10 @@ class Network:
                 self.bias[L-1] += self.v_bias[L-1]
 
 
-            if counter %30 == 0:
-                training_accuracy, training_loss = self.check(images, labels)
-                print("accuracy : %f\t loss : %f"%(training_accuracy,training_loss))
-
-
-
-
-
     def fit(self,raw_images,raw_labels,test_images,test_labels):
         index = np.arange(raw_images.shape[1])
         for i in range(self.max_epoch):
+            print("\nEpoch[%d]"%i)
 
             if self.is_shuffle:
                 np.random.shuffle(index)
@@ -171,27 +178,23 @@ class Network:
             training_images = images[:, 10000:]
             training_labels = labels[:, 10000:]
 
-            # validation_images = test_images
-            # validation_labels = test_labels
+
+            self.data["training_images"] = training_images.copy()
+            self.data["training_labels"] = training_labels.copy()
+            self.data["test_images"] = test_images.copy()
+            self.data["test_labels"] = test_labels.copy()
+            self.data["hold_out_images"] = hold_out_images.copy()
+            self.data["hold_out_labels"] = hold_out_labels.copy()
+
 
             self.train_with_mini_batch(training_images, training_labels)
-            training_accuracy,training_loss = self.check(training_images,training_labels)
-            test_accuracy,test_loss = self.check(test_images, test_labels)
-            hold_out_accuracy,hold_out_loss = self.check(hold_out_images, hold_out_labels)
-            print("Accuracy : Epoch[%d]\tTraining : %10.4f\t Test : %10.4f\t Hold out : %10.4f" % (i,training_accuracy * 100,test_accuracy * 100,hold_out_accuracy * 100))
-            print("Loss     : Epoch[%d]\tTraining : %10.4f\t Test : %10.4f\t Hold out : %10.4f"%(i,training_loss,test_loss,hold_out_loss))
+
+            del training_images
+            del training_labels
+            del hold_out_labels
+            del hold_out_images
 
 
-            #record accuracy
-            self.records["accuracy"]["training"].append(training_accuracy)
-            self.records["accuracy"]["test"].append(test_accuracy)
-            self.records["accuracy"]["hold_out"].append(hold_out_accuracy)
-
-            #record loss
-
-            self.records["loss"]["training"].append(training_loss)
-            self.records["loss"]["test"].append(test_loss)
-            self.records["loss"]["hold_out"].append(hold_out_loss)
 
 
 
@@ -213,6 +216,34 @@ class Network:
         E = self.calculate_loss(y,labels)
         # print(E)
         return np.sum(result == np.argmax(labels, axis = 0)) / labels.shape[1],E
+
+
+    def show_result(self):
+
+        training_images = self.data["training_images"]
+        training_labels = self.data["training_labels"]
+        test_images = self.data["test_images"]
+        test_labels = self.data["test_labels"]
+        hold_out_images = self.data["hold_out_images"]
+        hold_out_labels = self.data["hold_out_labels"]
+        training_accuracy, training_loss = self.check(training_images, training_labels)
+        test_accuracy, test_loss = self.check(test_images, test_labels)
+        hold_out_accuracy, hold_out_loss = self.check(hold_out_images, hold_out_labels)
+        print("Accuracy : \tTraining : %10.4f\t Test : %10.4f\t Hold out : %10.4f" % (
+            training_accuracy * 100, test_accuracy * 100, hold_out_accuracy * 100))
+        print("Loss     : \tTraining : %10.4f\t Test : %10.4f\t Hold out : %10.4f" % (
+            training_loss, test_loss, hold_out_loss))
+
+        # record accuracy
+        self.records["accuracy"]["training"].append(training_accuracy)
+        self.records["accuracy"]["test"].append(test_accuracy)
+        self.records["accuracy"]["hold_out"].append(hold_out_accuracy)
+
+        # record loss
+
+        self.records["loss"]["training"].append(training_loss)
+        self.records["loss"]["test"].append(test_loss)
+        self.records["loss"]["hold_out"].append(hold_out_loss)
 
 
 
