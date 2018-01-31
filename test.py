@@ -8,19 +8,14 @@ if __name__ == "__main__":
 
     net = Network(
         layers = [784,64,10],
-        max_epoch = 5,
-        eta = 0.0001,
+        max_epoch = 20,
+        eta = 0.01,
         func = 'sigmoid',
-        is_sqrt_initialize = True,
+        is_sqrt_initialize = False,
         is_shuffle = True,
-        momentum_type = 'momentum'
+        momentum_type = None
     )
     training_images,training_labels,test_images,test_labels = data_prep()
     net.fit(training_images,training_labels,test_images,test_labels)
-
-    plt.plot(np.arange(0,net.max_epoch),net.records["loss"]["training"])
-    plt.plot(np.arange(0, net.max_epoch), net.records["loss"]["test"])
-    plt.plot(np.arange(0, net.max_epoch), net.records["loss"]["hold_out"])
-    plt.show()
 
 

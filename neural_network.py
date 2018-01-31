@@ -125,7 +125,8 @@ class Network:
         for (mini_batch_data,mini_batch_labels) in  training_data:
             #train each data in the mini_batch
 
-            if counter % 30 ==0:
+            if counter % 80 ==0:
+                print("Counter:%d"%counter)
                 self.show_result()
 
             counter +=1
@@ -229,6 +230,11 @@ class Network:
         training_accuracy, training_loss = self.check(training_images, training_labels)
         test_accuracy, test_loss = self.check(test_images, test_labels)
         hold_out_accuracy, hold_out_loss = self.check(hold_out_images, hold_out_labels)
+        
+        # (training_accuracy, training_loss),(test_accuracy, test_loss),(hold_out_accuracy, hold_out_loss) = map(self.check,[(training_images, training_labels),(test_images, test_labels),(hold_out_images, hold_out_labels)])
+        
+        
+        
         print("Accuracy : \tTraining : %10.4f\t Test : %10.4f\t Hold out : %10.4f" % (
             training_accuracy * 100, test_accuracy * 100, hold_out_accuracy * 100))
         print("Loss     : \tTraining : %10.4f\t Test : %10.4f\t Hold out : %10.4f" % (

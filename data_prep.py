@@ -6,10 +6,12 @@ def read_in_data(s = "training"):
     mndata.gz = True
     if s == "training":
         images, labels = mndata.load_training()
+        
+        return np.array(images).T, np.array(labels)
     if s == "test":
-        images, labels = mndata.load_training()
-
-    return np.array(images).T, np.array(labels)
+        images, labels = mndata.load_testing()
+        
+        return np.array(images[0:20000]).T, np.array(labels[0:20000])
 
 
 def normalize_data(images,labels):
