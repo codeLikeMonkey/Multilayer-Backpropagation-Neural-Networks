@@ -201,7 +201,7 @@ class Network:
 
         E = -np.sum(np.sum(np.multiply(Target, np.log10(Y))))
 
-        return E.astype(float)
+        return E.astype(float)/Target.shape[1]
 
     def check(self,images,labels):
         raw_result = [self.test(images[:,i]) for i in range(labels.shape[1])]
