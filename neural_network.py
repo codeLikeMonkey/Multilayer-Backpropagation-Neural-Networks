@@ -64,12 +64,12 @@ class Network:
             },
             "accuracy": {
                 "training": [],
-                "val": [],
+                "test": [],
                 "hold_out": []
             },
             "loss": {
                 "training": [],
-                "val": [],
+                "test": [],
                 "hold_out": []
             }
 
@@ -155,7 +155,7 @@ class Network:
 
 
 
-    def fit(self,raw_images,raw_labels):
+    def fit(self,raw_images,raw_labels,test_images,test_labels):
         index = np.arange(raw_images.shape[1])
         for i in range(self.max_epoch):
 
@@ -165,32 +165,32 @@ class Network:
             images = raw_images[:, index]
             labels = raw_labels[:, index]
 
-            hold_out_images = images[:, 0:5000]
-            hold_out_labels = labels[:, 0:5000]
+            hold_out_images = images[:, 0:10000]
+            hold_out_labels = labels[:, 0:10000]
 
-            training_images = images[:, 5000:50000]
-            training_labels = labels[:, 5000:50000]
+            training_images = images[:, 10000:]
+            training_labels = labels[:, 10000:]
 
-            validation_images = images[:, 50000:]
-            validation_labels = labels[:, 50000:]
+            # validation_images = test_images
+            # validation_labels = test_labels
 
             self.train_with_mini_batch(training_images, training_labels)
             training_accuracy,training_loss = self.check(training_images,training_labels)
-            validation_accuracy,validation_loss = self.check(validation_images, validation_labels)
+            test_accuracy,test_loss = self.check(test_images, test_labels)
             hold_out_accuracy,hold_out_loss = self.check(hold_out_images, hold_out_labels)
-            print("Accuracy : Epoch[%d]\tTraining : %10.4f\t Val : %10.4f\t Hold out : %10.4f" % (i,training_accuracy * 100,validation_accuracy * 100,hold_out_accuracy * 100))
-            print("Loss     : Epoch[%d]\tTraining : %10.4f\t Val : %10.4f\t Hold out : %10.4f"%(i,training_loss,validation_loss,hold_out_loss))
+            print("Accuracy : Epoch[%d]\tTraining : %10.4f\t Test : %10.4f\t Hold out : %10.4f" % (i,training_accuracy * 100,test_accuracy * 100,hold_out_accuracy * 100))
+            print("Loss     : Epoch[%d]\tTraining : %10.4f\t Test : %10.4f\t Hold out : %10.4f"%(i,training_loss,test_loss,hold_out_loss))
 
 
             #record accuracy
             self.records["accuracy"]["training"].append(training_accuracy)
-            self.records["accuracy"]["val"].append(validation_accuracy)
+            self.records["accuracy"]["test"].append(test_accuracy)
             self.records["accuracy"]["hold_out"].append(hold_out_accuracy)
 
             #record loss
 
             self.records["loss"]["training"].append(training_loss)
-            self.records["loss"]["val"].append(validation_loss)
+            self.records["loss"]["test"].append(test_loss)
             self.records["loss"]["hold_out"].append(hold_out_loss)
 
 
