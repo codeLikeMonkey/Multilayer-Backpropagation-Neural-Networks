@@ -111,8 +111,10 @@ class Network:
         # divide the data in to small batches
         training_data = [(images[:,index_batch],labels[:,index_batch]) for index_batch in np.split(index,len(index)//self.mini_batch_size)]
         #one epoch
+        counter = 0
         for (mini_batch_data,mini_batch_labels) in  training_data:
             #train each data in the mini_batch
+            counter +=1
 
             Delta_batch_weights = [np.zeros((y,x)) for (x,y) in zip(self.layers[0:-1],self.layers[1:])]
             Delta_batch_bias =  [np.zeros((x,1)) for x in self.layers[1:]]
@@ -144,6 +146,15 @@ class Network:
                 self.weights[L-1] +=  self.v_delta_weights[L-1]
                 self.bias[L-1] += self.v_bias[L-1]
 
+
+            if counter %30 == 0:
+                training_accuracy, training_loss = self.check(images, labels)
+                print("accuracy : %f\t loss : %f"%(training_accuracy,training_loss))
+
+
+
+
+
     def fit(self,raw_images,raw_labels):
         index = np.arange(raw_images.shape[1])
         for i in range(self.max_epoch):
@@ -164,23 +175,47 @@ class Network:
             validation_labels = labels[:, 50000:]
 
             self.train_with_mini_batch(training_images, training_labels)
-            training_accuracy = self.check_accuracy(training_images,training_labels)
-            validation_accuracy = self.check_accuracy(validation_images, validation_labels)
-            hold_out_accuracy = self.check_accuracy(hold_out_images, hold_out_labels)
-            print("Epoch[%d]\tTraining : %.4f\t Val : %.4f\t Hold out : %.4f" % (i,training_accuracy * 100,validation_accuracy * 100,hold_out_accuracy * 100))
+            training_accuracy,training_loss = self.check(training_images,training_labels)
+            validation_accuracy,validation_loss = self.check(validation_images, validation_labels)
+            hold_out_accuracy,hold_out_loss = self.check(hold_out_images, hold_out_labels)
+            print("Accuracy : Epoch[%d]\tTraining : %10.4f\t Val : %10.4f\t Hold out : %10.4f" % (i,training_accuracy * 100,validation_accuracy * 100,hold_out_accuracy * 100))
+            print("Loss     : Epoch[%d]\tTraining : %10.4f\t Val : %10.4f\t Hold out : %10.4f"%(i,training_loss,validation_loss,hold_out_loss))
 
+
+            #record accuracy
             self.records["accuracy"]["training"].append(training_accuracy)
             self.records["accuracy"]["val"].append(validation_accuracy)
             self.records["accuracy"]["hold_out"].append(hold_out_accuracy)
 
+            #record loss
+
+            self.records["loss"]["training"].append(training_loss)
+            self.records["loss"]["val"].append(validation_loss)
+            self.records["loss"]["hold_out"].append(hold_out_loss)
 
 
-    def check_accuracy(self,images,lables):
-        result = np.array([np.argmax(self.test(images[:,i])) for i in range(lables.shape[1])])
-        return np.sum(result == np.argmax(lables, axis = 0)) / lables.shape[1]
 
-    def calculate_loss(self,target):
-        pass
+    def calculate_loss(self,result,labels):
+        Y = result.T
+        Target = labels
+
+        E = -np.sum(np.sum(np.multiply(Target, np.log10(Y))))
+
+        return E.astype(float)
+
+    def check(self,images,labels):
+        raw_result = [self.test(images[:,i]) for i in range(labels.shape[1])]
+        result = np.array([np.argmax(x) for x in raw_result])
+        # result = np.array([np.argmax(self.test(images[:,i])) for i in range(labels.shape[1])])
+        y = np.array([x.reshape(10, ) for x in raw_result])
+
+        #calculate cross entropy
+        E = self.calculate_loss(y,labels)
+        # print(E)
+        return np.sum(result == np.argmax(labels, axis = 0)) / labels.shape[1],E
+
+
+
 
 
 

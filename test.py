@@ -1,12 +1,13 @@
 from neural_network import *
 from data_prep import *
+import matplotlib.pyplot as plt
 
 
 
 if __name__ == "__main__":
 
     net = Network(
-        layers = [784,10],
+        layers = [784,64,10],
         max_epoch = 200,
         eta = 0.0001,
         func = 'sigmoid',
@@ -16,5 +17,10 @@ if __name__ == "__main__":
     )
     images,labels = data_prep()
     net.fit(images,labels)
+
+    plt.plot(np.arange(0,net.max_epoch),net.records["loss"]["training"])
+    plt.plot(np.arange(0, net.max_epoch), net.records["loss"]["val"])
+    plt.plot(np.arange(0, net.max_epoch), net.records["loss"]["hold_out"])
+    plt.show()
 
 
