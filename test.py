@@ -10,7 +10,7 @@ if __name__ == "__main__":
         layers = [784,64,10],
         max_epoch = 20,
         eta = 0.01,
-        func = 'sigmoid',
+        func = 'tanh2',
         is_sqrt_initialize = False,
         is_shuffle = True,
         momentum_type = None

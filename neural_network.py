@@ -14,6 +14,14 @@ def tan_sigmoid(k):
 def tan_sigmoid_prime(k):
     return 1 - tan_sigmoid(k)**2
 
+
+def tan_sigmoid_2(k):
+    # return 1.7159 * (np.exp(2/3 * k) - np.exp(-2/3 * k))/(np.exp(2/3 * k) + np.exp(-2/3 *k))
+    return 1.7159 * np.tanh(2/3 *k)
+def tan_sigmoid_2_prime(k):
+    return 17159/15000 - (17159*np.tanh((2*k)/3)**2)/15000
+
+
 def softmax(last_layers):
     alpha = last_layers - np.max(last_layers)
     alpha = np.exp(alpha)
@@ -52,6 +60,11 @@ class Network:
         if func == "tanh":
             self.g = tan_sigmoid
             self.g_prime = tan_sigmoid_prime
+
+        if func == "tanh2":
+            self.g = tan_sigmoid_2
+            self.g_prime = tan_sigmoid_2_prime
+
 
         self.records = {
             "config": {
@@ -203,9 +216,9 @@ class Network:
         Y = result.T
         Target = labels
 
-        E = -np.sum(np.sum(np.multiply(Target, np.log10(Y))))
+        E = -np.sum(np.sum(np.multiply(Target, np.log(Y))))
 
-        return E.astype(float)#/Target.shape[1]
+        return E.astype(float)/Target.shape[1]
 
     def check(self,images,labels):
         raw_result = [self.test(images[:,i]) for i in range(labels.shape[1])]
