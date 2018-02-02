@@ -216,7 +216,7 @@ class Network:
         Y = result.T
         Target = labels
 
-        E = -np.sum(np.sum(np.multiply(Target, np.log(Y))))
+        E = -np.sum(np.sum(np.multiply(Target, np.log(Y + np.exp(-10)))))
 
         return E.astype(float)/Target.shape[1]
 
